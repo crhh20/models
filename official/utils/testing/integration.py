@@ -30,7 +30,7 @@ import time
 PYTHON_CMD = "python2" if sys.version_info[0] == 2 else "python3"
 
 
-def run_synthetic(file_path):
+def run_synthetic(file_path, extra_flags=None):
   """Performs a minimal run of a model.
 
     This function is intended to test for syntax errors throughout a model. A
@@ -38,12 +38,15 @@ def run_synthetic(file_path):
 
   Args:
     file_path: The absolute path of a python script to be tested.
+    extra_flags: Additional flags passed by the the caller of this function.
 
   Raises:
     OSError: Any error detected in the run causes an OSError. Because the code
       is run as a subprocess, it is not able to manifest the specific python
       error that was raised.
   """
+
+  extra_flags = [] if extra_flags is None else extra_flags
 
   model_dir = "/tmp/model_test_{}".format(hash(time.time()))
   if os.path.exists(model_dir):
@@ -52,7 +55,7 @@ def run_synthetic(file_path):
   args = [PYTHON_CMD, file_path, "--model_dir", model_dir,
           "--train_epochs", "1", "--epochs_per_eval", "1",
           "--use_synthetic_data",
-          "--max_train_steps", "10"]
+          "--max_train_steps", "1"] + extra_flags
 
   p = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)
